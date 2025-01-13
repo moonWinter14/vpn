@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPN Server Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            height: 100vh;
+            background-color: #343a40;
+            color: white;
+            position: fixed;
+            width: 250px;
+        }
+        
+        .sidebar .nav-link {
+            color: white;
+            font-size: 1.1rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: #495057;
+        }
+        
+        .content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+        
+        .card-header {
+            background-color: #0d6efd;
+            color: white;
+        }
+        
+        .table thead {
+            background-color: #0d6efd;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar d-flex flex-column p-3">
+        <h2 class="text-center">VPN Admin Panel</h2>
+        <hr>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="#dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#users"><i class="fas fa-users me-2"></i>Manage Users</a>
+            </li>
+            <li class="nav-item mt-auto">
+                <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <h1>Dashboard</h1>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Active Users</div>
+                    <div class="card-body text-center">
+                        <h3>{{ users|length }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Servers Online</div>
+                    <div class="card-body text-center">
+                        <h3>8</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Connections Today</div>
+                    <div class="card-body text-center">
+                        <h3>450</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Upload Users via CSV</div>
+            <div class="card-body">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="csvFile" class="form-label">Choose CSV File</label>
+                        <input type="file" class="form-control" id="csvFile" name="csvFile" accept=".csv" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+                <div id="uploadResult" class="mt-3"></div>
+            </div>
+        </div>
+
+
+        <h2 id="users">Manage Users</h2>
+        <div class="card mb-4">
+            <div class="card-header">User List</div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr id="user-{{ user['id'] }}">
+                            <td>{{ user['id'] }}</td>
+                            <td>{{ user['username'] }}</td>
+                            <td>{{ user['mail'] }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteUser({{ user['id'] }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function deleteUser(userId) {
+            if (confirm("Are you sure you want to delete this user?")) {
+                fetch(`/delete_user/${userId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const row = document.getElementById(`user-${userId}`);
+                            if (row) {
+                                row.remove();
+                            }
+                        } else {
+                            alert("Error: " + (data.error || "Could not delete user."));
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error deleting user:", error);
+                        alert("An error occurred while deleting the user.");
+                    });
+            }
+        }
+    </script>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            const fileInput = document.getElementById('csvFile');
+            formData.append('csvFile', fileInput.files[0]);
+
+            fetch('/upload_csv', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const resultDiv = document.getElementById('uploadResult');
+                    if (data.success) {
+                        resultDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                    } else {
+                        resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error uploading file:", error);
+                    document.getElementById('uploadResult').innerHTML = `<div class="alert alert-danger">An error occurred.</div>`;
+                });
+        });
+    </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
