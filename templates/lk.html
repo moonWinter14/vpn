@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+        
+        .sidebar {
+            height: 100vh;
+            background-color: #343a40;
+            color: white;
+            position: fixed;
+            width: 250px;
+        }
+        
+        .sidebar .nav-link {
+            color: white;
+            font-size: 1.1rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: #495057;
+        }
+        
+        .content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+        
+        .card-header {
+            background-color: #0d6efd;
+            color: white;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .qr-code img {
+            width: 150px;
+            height: 150px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar d-flex flex-column p-3">
+        <h2 class="text-center">User Dashboard</h2>
+        <hr>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="#profile"><i class="fas fa-user me-2"></i>Profile</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#configs"><i class="fas fa-cogs me-2"></i>VPN Configs</a>
+            </li>
+            <li class="nav-item mt-auto">
+                <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <h1>Здравствуйте, {{username}}</h1>
+
+        <section id="profile" class="mb-4">
+            <h2>Profile</h2>
+            <div class="card">
+                <div class="card-header">User Information</div>
+                <div class="card-body">
+                    <p><strong>Username:</strong> {{username}}</p>
+                    <p><strong>Email:</strong> {{mail}}</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="configs">
+            <h2>VPN Configurations</h2>
+            <div class="card mb-4">
+                <div class="card-header">Available Configurations</div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span>Server 1 - US East</span>
+                        <div>
+                            <button class="btn btn-primary btn-sm me-2">Download Config</button>
+                            <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#qrModal">View QR Code</button>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span>Server 2 - EU West</span>
+                        <div>
+                            <button class="btn btn-primary btn-sm me-2">Download Config</button>
+                            <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#qrModal">View QR Code</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrModalLabel">VPN QR Code</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Scan this QR code to configure your VPN:</p>
+                    <img src="https://via.placeholder.com/150" alt="QR Code">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
